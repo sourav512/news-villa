@@ -14,7 +14,6 @@ export class News extends Component {
     country: PropTypes.string,
     category: PropTypes.string,
   };
-
   constructor(props) {
     super();
     this.state = {
@@ -28,39 +27,43 @@ export class News extends Component {
     }`;
   }
 
-  async updateNews() {
-    let apiUrl = `https://newsapi.org/v2/top-headlines?language=en${this.props.country.lenth === 0 ? "" : "&country=" + this.props.country}${"&category=" + this.props.category}&apiKey=12ce795aa2234bf3813cb3abd8e157f1&page=${this.state.page}&pageSize=12`;
-    this.setState({ loading: true });
+  async updateNews(props) {
+      this.props.setProgress(10);
+      let apiUrl = `https://newsapi.org/v2/top-headlines?language=en${this.props.country.lenth === 0 ? "" : "&country=" + this.props.country}${"&category=" + this.props.category}&apiKey=${this.props.apiKey}&page=${this.state.page}&pageSize=12`;
+      this.setState({ loading: true });
       let data = await fetch(apiUrl);
+      this.props.setProgress(30);
       let parsedData = await data.json();
       console.log(parsedData);
+      this.props.setProgress(70);
       this.setState({
-        articles: parsedData.articles,
-        totalResult: parsedData.totalResults,
-        loading: false,
-      });
-  }
-
-  async componentDidMount() {
-    console.log("CDM");
+          articles: parsedData.articles,
+          totalResult: parsedData.totalResults,
+          loading: false,
+        });
+        this.props.setProgress(100);
+    }
+    
+    async componentDidMount() {
+        console.log("CDM");
     this.updateNews();
-  }
-  fetchMoreData = async () => {
-      this.setState({page:this.state.page +1})
-      let apiUrl = `https://newsapi.org/v2/top-headlines?language=en${this.props.country.lenth === 0 ? "" : "&country=" + this.props.country}${"&category=" + this.props.category}&apiKey=12ce795aa2234bf3813cb3abd8e157f1&page=${this.state.page}&pageSize=12`;
-      let data = await fetch(apiUrl);
-      let parsedData = await data.json();
-      console.log(parsedData);
-      this.setState({
+}
+fetchMoreData = async () => {
+    this.setState({page:this.state.page +1})
+    let apiUrl = `https://newsapi.org/v2/top-headlines?language=en${this.props.country.lenth === 0 ? "" : "&country=" + this.props.country}${"&category=" + this.props.category}&apiKey=${this.props.apiKey}&page=${this.state.page}&pageSize=12`;
+    let data = await fetch(apiUrl);
+    let parsedData = await data.json();
+    console.log(parsedData);
+    this.setState({
         articles: this.state.articles.concat(parsedData.articles),
         totalResult: parsedData.totalResults,
-      });
-  };
+    });
+};
 
-  render() {
+render() {
     console.log("render");
     return (
-      <div className="container my-3">
+        <div className="container my-3">
         <h2 className="text-center">
           Top Headline
           {this.props.category !== "general"? " - " +this.props.category.charAt(0).toUpperCase() +this.props.category.slice(1, 20): ""}
